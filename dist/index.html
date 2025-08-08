@@ -352,15 +352,137 @@
       // Safe debug logging function
       function safeAddDebugEntry(message, level = 'info') {
         try {
-          if (typeof addDebugEntry === 'function') {
+          // Try to call the function, even if it wasn't available earlier
+          if (window.addDebugEntry || typeof addDebugEntry === 'function') {
             addDebugEntry(message, level);
           } else {
             console.log(`[DEBUG ${level.toUpperCase()}]`, message);
+            // Store the message for later if addDebugEntry becomes available
+            if (!window.pendingDebugEntries) window.pendingDebugEntries = [];
+            window.pendingDebugEntries.push({message, level, timestamp: new Date()});
           }
         } catch (error) {
           console.log(`[DEBUG ${level.toUpperCase()}]`, message);
         }
       }
+
+      // Debug log functionality - moved to global scope
+      function addDebugEntry(message, level = 'info') {
+        if (!debugEnabled) return;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        const entry = {
+          timestamp,
+          message,
+          level,
+          id: Date.now() + Math.random()
+        };
+        
+        debugLog.push(entry);
+        debugLogCount++;
+        
+        // Keep only last 1000 entries to prevent memory issues
+        if (debugLog.length > 1000) {
+          debugLog = debugLog.slice(-1000);
+        }
+        
+        updateDebugDisplay();
+        
+        // Process any pending debug entries from before this function was available
+        if (window.pendingDebugEntries && window.pendingDebugEntries.length > 0) {
+          const pending = window.pendingDebugEntries;
+          window.pendingDebugEntries = [];
+          pending.forEach(pendingEntry => {
+            addDebugEntry(pendingEntry.message, pendingEntry.level);
+          });
+        }
+      }
+
+      function updateDebugDisplay() {
+        const logElement = document.getElementById('debug-log');
+        const countElement = document.getElementById('debug-log-count');
+        
+        if (!logElement || !countElement) return;
+        
+        countElement.textContent = debugLogCount;
+        
+        // Build HTML for recent entries (show last 50)
+        const recentEntries = debugLog.slice(-50);
+        const html = recentEntries.map(entry => {
+          const levelColors = {
+            info: 'text-green-400',
+            warn: 'text-yellow-400',
+            error: 'text-red-400',
+            success: 'text-blue-400'
+          };
+          
+          return `<div class="${levelColors[entry.level] || 'text-green-400'}">
+            <span class="text-gray-500">[${entry.timestamp}]</span> ${entry.message}
+          </div>`;
+        }).join('');
+        
+        if (html) {
+          logElement.innerHTML = html;
+        }
+        
+        // Auto-scroll to bottom if enabled
+        const autoScroll = document.getElementById('auto-scroll');
+        if (autoScroll && autoScroll.checked) {
+          logElement.scrollTop = logElement.scrollHeight;
+        }
+      }
+
+      function toggleDebugLog() {
+        debugEnabled = !debugEnabled;
+        const button = document.getElementById('toggle-debug');
+        const status = document.getElementById('debug-status');
+        const statusText = document.getElementById('debug-status-text');
+        
+        if (debugEnabled) {
+          button.textContent = 'Pause';
+          status.className = 'w-3 h-3 bg-green-500 rounded-full';
+          statusText.textContent = 'Live';
+          addDebugEntry('🟢 Debug logging resumed', 'success');
+        } else {
+          button.textContent = 'Resume';
+          status.className = 'w-3 h-3 bg-red-500 rounded-full';
+          statusText.textContent = 'Paused';
+        }
+      }
+
+      function clearDebugLog() {
+        debugLog = [];
+        debugLogCount = 0;
+        document.getElementById('debug-log').innerHTML = '<div class="text-gray-500">🚀 Debug log cleared - Backend output will appear here...</div>';
+        document.getElementById('debug-log-count').textContent = '0';
+      }
+
+      // Simulate backend debug messages (since we can't actually capture stderr in browser)
+      function startDebugSimulation() {
+        if (debugUpdateInterval) return;
+        
+        debugUpdateInterval = setInterval(() => {
+          if (!debugEnabled) return;
+          
+          // Add some sample debug messages
+          const messages = [
+            '📡 Backend heartbeat check',
+            '🔄 Processing user request',
+            '📊 Stats updated successfully',
+            '💾 File operation completed',
+            '🔐 Security check passed',
+            '⚡ Performance metrics logged',
+            '🌐 Network connection stable',
+            '🎯 Task queue processed'
+          ];
+          
+          const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+          addDebugEntry(randomMessage, 'info');
+        }, 3000 + Math.random() * 2000); // Every 3-5 seconds
+      }
+
+      // Test that debug logging is working
+      addDebugEntry('🐛 Debug system initialized', 'success');
 
       // File management functionality
       function addFileTab(fileName, fileId) {
@@ -562,7 +684,7 @@
         console.log('=== openFilePicker function called ===');
         try {
           console.log('Opening file picker...');
-          safeAddDebugEntry('📁 Opening file picker dialog', 'info');
+          addDebugEntry('📁 Opening file picker dialog', 'info');
           
           // Create file input element
           const input = document.createElement('input');
@@ -577,7 +699,7 @@
               const fileId = Date.now().toString(); // Simple ID generation
               const fileName = file.name;
               
-              safeAddDebugEntry(`📄 File selected: ${fileName}`, 'success');
+                            addDebugEntry(`📄 File selected: ${fileName}`, 'success');
               
               // Add tab for the selected file
               addFileTab(fileName, fileId);
@@ -644,112 +766,6 @@
 
         // Mobile menu toggle
         mobileMenuBtn.addEventListener('click', toggleMobileMenu);
-
-        // Debug log functionality
-        function addDebugEntry(message, level = 'info') {
-          if (!debugEnabled) return;
-          
-          const timestamp = new Date().toLocaleTimeString();
-          const entry = {
-            timestamp,
-            message,
-            level,
-            id: Date.now() + Math.random()
-          };
-          
-          debugLog.push(entry);
-          debugLogCount++;
-          
-          // Keep only last 1000 entries to prevent memory issues
-          if (debugLog.length > 1000) {
-            debugLog = debugLog.slice(-1000);
-          }
-          
-          updateDebugDisplay();
-        }
-
-        function updateDebugDisplay() {
-          const logElement = document.getElementById('debug-log');
-          const countElement = document.getElementById('debug-log-count');
-          
-          if (!logElement || !countElement) return;
-          
-          countElement.textContent = debugLogCount;
-          
-          // Build HTML for recent entries (show last 50)
-          const recentEntries = debugLog.slice(-50);
-          const html = recentEntries.map(entry => {
-            const levelColors = {
-              info: 'text-green-400',
-              warn: 'text-yellow-400',
-              error: 'text-red-400',
-              success: 'text-blue-400'
-            };
-            
-            return `<div class="${levelColors[entry.level] || 'text-green-400'}">
-              <span class="text-gray-500">[${entry.timestamp}]</span> ${entry.message}
-            </div>`;
-          }).join('');
-          
-          if (html) {
-            logElement.innerHTML = html;
-          }
-          
-          // Auto-scroll to bottom if enabled
-          const autoScroll = document.getElementById('auto-scroll');
-          if (autoScroll && autoScroll.checked) {
-            logElement.scrollTop = logElement.scrollHeight;
-          }
-        }
-
-        function toggleDebugLog() {
-          debugEnabled = !debugEnabled;
-          const button = document.getElementById('toggle-debug');
-          const status = document.getElementById('debug-status');
-          const statusText = document.getElementById('debug-status-text');
-          
-          if (debugEnabled) {
-            button.textContent = 'Pause';
-            status.className = 'w-3 h-3 bg-green-500 rounded-full';
-            statusText.textContent = 'Live';
-            safeAddDebugEntry('🟢 Debug logging resumed', 'success');
-          } else {
-            button.textContent = 'Resume';
-            status.className = 'w-3 h-3 bg-red-500 rounded-full';
-            statusText.textContent = 'Paused';
-          }
-        }
-
-        function clearDebugLog() {
-          debugLog = [];
-          debugLogCount = 0;
-          document.getElementById('debug-log').innerHTML = '<div class="text-gray-500">🚀 Debug log cleared - Backend output will appear here...</div>';
-          document.getElementById('debug-log-count').textContent = '0';
-        }
-
-        // Simulate backend debug messages (since we can't actually capture stderr in browser)
-        function startDebugSimulation() {
-          if (debugUpdateInterval) return;
-          
-          debugUpdateInterval = setInterval(() => {
-            if (!debugEnabled) return;
-            
-            // Add some sample debug messages
-            const messages = [
-              '📡 Backend heartbeat check',
-              '🔄 Processing user request',
-              '📊 Stats updated successfully',
-              '💾 File operation completed',
-              '🔐 Security check passed',
-              '⚡ Performance metrics logged',
-              '🌐 Network connection stable',
-              '🎯 Task queue processed'
-            ];
-            
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            safeAddDebugEntry(randomMessage, 'info');
-          }, 3000 + Math.random() * 2000); // Every 3-5 seconds
-        }
 
         function showSection(sectionId) {
           sections.forEach(section => {
@@ -902,15 +918,15 @@
       // Main button click handler
       async function handleButtonClick() {
         console.log('Button clicked, invoke available:', !!invoke);
-        safeAddDebugEntry('🔘 Frontend button clicked', 'info');
+        addDebugEntry('🔘 Frontend button clicked', 'info');
         
         if (!invoke) {
-          safeAddDebugEntry('⚠️ Tauri invoke not available, attempting to initialize...', 'warn');
+          addDebugEntry('⚠️ Tauri invoke not available, attempting to initialize...', 'warn');
           await initializeTauri();
         }
 
         if (!invoke) {
-          safeAddDebugEntry('❌ Failed to initialize Tauri invoke', 'error');
+          addDebugEntry('❌ Failed to initialize Tauri invoke', 'error');
           document.getElementById('response').innerHTML = `
             <div class="text-red-600 font-semibold">❌ Tauri invoke not available</div>
           `;
@@ -920,11 +936,11 @@
         try {
           document.getElementById('status').textContent = 'Loading...';
           document.getElementById('response').textContent = 'Calling Rust backend... 🔄';
-          safeAddDebugEntry('📡 Calling Rust backend function: button_clicked', 'info');
+          addDebugEntry('📡 Calling Rust backend function: button_clicked', 'info');
           
           const result = await invoke('button_clicked');
           console.log('Received from Rust:', result);
-          safeAddDebugEntry(`✅ Backend response received: ${result.message}`, 'success');
+          addDebugEntry(`✅ Backend response received: ${result.message}`, 'success');
           
           clickCount++;
           appStats.clicks++;
@@ -940,7 +956,7 @@
           
         } catch (error) {
           console.error('Button click error:', error);
-          safeAddDebugEntry(`❌ Backend call failed: ${error.message}`, 'error');
+          addDebugEntry(`❌ Backend call failed: ${error.message}`, 'error');
           document.getElementById('response').innerHTML = `
             <div class="text-red-700">
               <span class="font-semibold">❌ Error:</span><br>
@@ -958,15 +974,15 @@
         
         if (!message) return;
         
-        safeAddDebugEntry(`💬 Preparing to send message: "${message}"`, 'info');
+        addDebugEntry(`💬 Preparing to send message: "${message}"`, 'info');
         
         if (!invoke) {
-          safeAddDebugEntry('⚠️ Tauri invoke not available for message, attempting to initialize...', 'warn');
+          addDebugEntry('⚠️ Tauri invoke not available for message, attempting to initialize...', 'warn');
           await initializeTauri();
         }
 
         if (!invoke) {
-          safeAddDebugEntry('❌ Failed to initialize Tauri for message sending', 'error');
+          addDebugEntry('❌ Failed to initialize Tauri for message sending', 'error');
           if (!isSecondInput) {
             document.getElementById('response').innerHTML = `
               <div class="text-red-600 font-semibold">❌ Tauri API not available</div>
@@ -977,10 +993,10 @@
 
         try {
           console.log('Sending message:', message);
-          safeAddDebugEntry('📡 Calling Rust backend function: send_message', 'info');
+          addDebugEntry('📡 Calling Rust backend function: send_message', 'info');
           const result = await invoke('send_message', { message });
           console.log('Message response:', result);
-          safeAddDebugEntry(`✅ Message response received: "${result.response}"`, 'success');
+          addDebugEntry(`✅ Message response received: "${result.response}"`, 'success');
           
           appStats.messages++;
           updateStatsDisplay();
@@ -1120,8 +1136,8 @@
         
         // Initialize debug log with a small delay to ensure everything is loaded
         setTimeout(() => {
-          safeAddDebugEntry('🚀 Tauri + Tailwind App initialized', 'success');
-          safeAddDebugEntry('🔧 Debug logging system started', 'info');
+          addDebugEntry('🚀 Tauri + Tailwind App initialized', 'success');
+          addDebugEntry('🔧 Debug logging system started', 'info');
           startDebugSimulation();
         }, 100);
 
