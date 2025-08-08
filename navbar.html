@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tauri Navigation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo and Brand -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="h-8 w-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">🦀</span>
+                        </div>
+                        <span class="ml-3 text-xl font-bold text-gray-900">Tauri App</span>
+                    </div>
+                    
+                    <!-- Desktop Navigation Links -->
+                    <div class="hidden md:ml-10 md:flex md:space-x-8">
+                        <a href="#home" class="nav-link border-primary text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            🏠 Home
+                        </a>
+                        <a href="#features" class="nav-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            ⚡ Features
+                        </a>
+                        <a href="#backend" class="nav-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            🔧 Backend
+                        </a>
+                        <a href="#stats" class="nav-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            📊 Stats
+                        </a>
+                        <a href="#settings" class="nav-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            ⚙️ Settings
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right side items -->
+                <div class="flex items-center space-x-4">
+                    <!-- Status indicator -->
+                    <div class="hidden sm:flex items-center space-x-2">
+                        <div id="status-indicator" class="h-2 w-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span id="status-text" class="text-sm text-gray-600">Connected</span>
+                    </div>
+                    
+                    <!-- Action buttons -->
+                    <button id="test-backend" class="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5">
+                        Test Backend
+                    </button>
+                    
+                    <!-- Mobile menu button -->
+                    <button id="mobile-menu-btn" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path class="block" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50 border-t border-gray-200">
+                <a href="#home" class="mobile-nav-link bg-primary text-white block px-3 py-2 rounded-md text-base font-medium">
+                    🏠 Home
+                </a>
+                <a href="#features" class="mobile-nav-link text-gray-700 hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">
+                    ⚡ Features
+                </a>
+                <a href="#backend" class="mobile-nav-link text-gray-700 hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">
+                    🔧 Backend
+                </a>
+                <a href="#stats" class="mobile-nav-link text-gray-700 hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">
+                    📊 Stats
+                </a>
+                <a href="#settings" class="mobile-nav-link text-gray-700 hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">
+                    ⚙️ Settings
+                </a>
+                <div class="pt-2 border-t border-gray-300">
+                    <button id="mobile-test-backend" class="w-full bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-lg text-base font-medium">
+                        Test Backend
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <!-- Content sections -->
+            <div id="home" class="content-section">
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">🏠 Welcome Home</h2>
+                    <p class="text-gray-600 mb-4">This is your Tauri application with a beautiful navigation bar. The navbar is responsive and includes interactive elements.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-indigo-900">🦀 Rust Backend</h3>
+                            <p class="text-sm text-indigo-700">Powered by blazingly fast Rust</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-purple-900">🎨 Tailwind UI</h3>
+                            <p class="text-sm text-purple-700">Beautiful, responsive design</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-green-900">📱 Cross-Platform</h3>
+                            <p class="text-sm text-green-700">Works on all desktop platforms</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="features" class="content-section hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">⚡ Features</h2>
+                    <ul class="space-y-3">
+                        <li class="flex items-center space-x-3">
+                            <span class="h-2 w-2 bg-green-400 rounded-full"></span>
+                            <span>Responsive Navigation Bar</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="h-2 w-2 bg-green-400 rounded-full"></span>
+                            <span>Mobile-friendly Design</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="h-2 w-2 bg-green-400 rounded-full"></span>
+                            <span>Tauri Backend Integration</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="h-2 w-2 bg-green-400 rounded-full"></span>
+                            <span>Beautiful Tailwind Styling</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="backend" class="content-section hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">🔧 Backend Status</h2>
+                    <div id="backend-status" class="space-y-4">
+                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                            <span>Backend Connection</span>
+                            <span class="px-2 py-1 bg-gray-300 text-gray-700 rounded text-sm">Unknown</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                            <span>API Status</span>
+                            <span class="px-2 py-1 bg-gray-300 text-gray-700 rounded text-sm">Not Tested</span>
+                        </div>
+                        <button id="refresh-backend" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+                            Refresh Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="stats" class="content-section hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">📊 Application Stats</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center p-4 bg-blue-50 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600">0</div>
+                            <div class="text-sm text-blue-800">Total Clicks</div>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600">0</div>
+                            <div class="text-sm text-purple-800">Messages Sent</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings" class="content-section hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">⚙️ Settings</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span>Dark Mode</span>
+                            <button class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300">
+                                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition"></span>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Notifications</span>
+                            <button class="relative inline-flex h-6 w-11 items-center rounded-full bg-primary">
+                                <span class="inline-block h-4 w-4 transform translate-x-6 rounded-full bg-white transition"></span>
+                            </button>
+                        </div>
+                        <div class="border-t pt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Theme Color</label>
+                            <div class="flex space-x-3">
+                                <button class="h-8 w-8 rounded-full bg-blue-500 ring-2 ring-blue-200"></button>
+                                <button class="h-8 w-8 rounded-full bg-purple-500"></button>
+                                <button class="h-8 w-8 rounded-full bg-green-500"></button>
+                                <button class="h-8 w-8 rounded-full bg-red-500"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Tauri API (if available)
+        let invoke = null;
+        
+        async function initTauri() {
+            if (window.__TAURI__) {
+                invoke = window.__TAURI__.core?.invoke || window.__TAURI__.invoke;
+                console.log('Tauri API initialized');
+                updateStatus('Connected', 'success');
+                return true;
+            }
+            console.log('Tauri API not available');
+            updateStatus('Disconnected', 'error');
+            return false;
+        }
+
+        // Navigation functionality
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
+            
+            // Update navigation active state
+            updateNavActiveState(sectionId);
+        }
+
+        function updateNavActiveState(activeId) {
+            // Desktop navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === `#${activeId}`) {
+                    link.classList.remove('border-transparent', 'text-gray-500');
+                    link.classList.add('border-primary', 'text-gray-900');
+                } else {
+                    link.classList.add('border-transparent', 'text-gray-500');
+                    link.classList.remove('border-primary', 'text-gray-900');
+                }
+            });
+            
+            // Mobile navigation
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                if (link.getAttribute('href') === `#${activeId}`) {
+                    link.classList.add('bg-primary', 'text-white');
+                    link.classList.remove('text-gray-700');
+                } else {
+                    link.classList.remove('bg-primary', 'text-white');
+                    link.classList.add('text-gray-700');
+                }
+            });
+        }
+
+        function updateStatus(text, type) {
+            const statusIndicator = document.getElementById('status-indicator');
+            const statusText = document.getElementById('status-text');
+            
+            statusIndicator.className = 'h-2 w-2 rounded-full animate-pulse';
+            
+            if (type === 'success') {
+                statusIndicator.classList.add('bg-green-400');
+            } else if (type === 'error') {
+                statusIndicator.classList.add('bg-red-400');
+            } else {
+                statusIndicator.classList.add('bg-yellow-400');
+            }
+            
+            statusText.textContent = text;
+        }
+
+        async function testBackend() {
+            if (!invoke) {
+                alert('Tauri API not available');
+                return;
+            }
+            
+            try {
+                updateStatus('Testing...', 'loading');
+                const response = await invoke('button_clicked');
+                updateStatus('Backend OK', 'success');
+                alert(`Backend Response: ${response}`);
+                
+                // Update backend status section
+                const backendStatus = document.getElementById('backend-status');
+                backendStatus.innerHTML = `
+                    <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg">
+                        <span>Backend Connection</span>
+                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">Connected</span>
+                    </div>
+                    <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg">
+                        <span>API Status</span>
+                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">Working</span>
+                    </div>
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <p class="text-sm text-blue-800">Last Response: "${response}"</p>
+                    </div>
+                    <button id="refresh-backend" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+                        Test Again
+                    </button>
+                `;
+                
+                // Re-attach event listener
+                document.getElementById('refresh-backend').addEventListener('click', testBackend);
+                
+            } catch (error) {
+                updateStatus('Backend Error', 'error');
+                alert(`Error: ${error}`);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Tauri
+            setTimeout(initTauri, 100);
+            
+            // Navigation click handlers
+            document.querySelectorAll('a[href^="#"]').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = link.getAttribute('href').substring(1);
+                    showSection(sectionId);
+                    
+                    // Close mobile menu if open
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+            
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Test backend buttons
+            document.getElementById('test-backend').addEventListener('click', testBackend);
+            document.getElementById('mobile-test-backend').addEventListener('click', testBackend);
+            document.getElementById('refresh-backend').addEventListener('click', testBackend);
+            
+            // Show home section by default
+            showSection('home');
+        });
+    </script>
+</body>
+</html>

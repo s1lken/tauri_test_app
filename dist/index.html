@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri + Tailwind App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#667eea',
+              secondary: '#764ba2'
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Custom scrollbar styles */
+      .scrollbar-hide {
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+        scrollbar-width: none;  /* Firefox */
+      }
+      .scrollbar-hide::-webkit-scrollbar { 
+        display: none;  /* Safari and Chrome */
+      }
+      
+      /* Drag cursor styles */
+      .cursor-grab {
+        cursor: grab;
+      }
+      .cursor-grab:active {
+        cursor: grabbing;
+      }
+      
+      /* Smooth transitions for dragging */
+      .drag-transition {
+        transition: transform 0.2s ease-out;
+      }
+      
+      /* Prevent text selection during drag */
+      .no-select {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gray-50">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo and Brand -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="h-8 w-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">🦀</span>
+                        </div>
+                        <span class="ml-3 text-xl font-bold text-gray-900">Tauri App</span>
+                    </div>
+                    
+                    <!-- Desktop Navigation Links -->
+                    <div class="hidden md:ml-10 md:flex md:space-x-8">
+                        <a href="#home" class="nav-link border-primary text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            🏠 Home
+                        </a>
+                        <a href="#backend" class="nav-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            🔧 Backend
+                        </a>
+                        <a href="#stats" class="nav-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            📊 Stats
+                        </a>
+                        <a href="#messages" class="nav-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            💬 Messages
+                        </a>
+                        <a href="#debug" class="nav-link border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            🐛 Debug Log
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right side items -->
+                <div class="flex items-center space-x-4">
+                    <!-- Action buttons -->
+                    <button id="navbar-test-backend" onclick="openFilePicker()" class="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5">
+                        Add File
+                    </button>
+                    
+                    <!-- Mobile menu button -->
+                    <button id="mobile-menu-btn" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path class="block" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50 border-t border-gray-200">
+                <a href="#home" class="mobile-nav-link bg-primary text-white block px-3 py-2 rounded-md text-base font-medium">
+                    🏠 Home
+                </a>
+                <a href="#backend" class="mobile-nav-link text-gray-700 hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">
+                    🔧 Backend
+                </a>
+                <a href="#stats" class="mobile-nav-link text-gray-700 hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">
+                    📊 Stats
+                </a>
+                <a href="#messages" class="mobile-nav-link text-gray-700 hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">
+                    💬 Messages
+                </a>
+                <a href="#debug" class="mobile-nav-link text-gray-700 hover:bg-gray-200 block px-3 py-2 rounded-md text-base font-medium">
+                    🐛 Debug Log
+                </a>
+                <div class="pt-2 border-t border-gray-300">
+                    <button id="mobile-test-backend" onclick="openFilePicker()" class="w-full bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-lg text-base font-medium">
+                        Add File
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Secondary Navigation Bar (only visible in Home section) -->
+            <!-- Secondary Navbar for Home section -->
+        <div id="secondary-nav" class="hidden bg-gray-700 border-b border-gray-600 relative">
+          <div id="secondary-nav-container" class="max-w-7xl mx-auto px-4 cursor-grab overflow-hidden">
+            <div id="secondary-nav-links" class="flex transition-transform duration-200 ease-out py-3">
+              <!-- File tabs will be dynamically added here -->
+            </div>
+          </div>
+        </div>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <!-- Home Section (Your existing app) -->
+            <div id="home" class="content-section">
+                <div class="max-w-md mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-primary to-secondary p-6 text-white text-center">
+                        <h1 class="text-2xl font-bold mb-2">🦀 Tauri + Tailwind</h1>
+                        <p class="text-blue-100">Modern Rust Backend</p>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="p-6 space-y-6">
+                        <!-- Button Section -->
+                        <div class="text-center">
+                            <button id="click-btn" class="
+                              w-full bg-gradient-to-r from-primary to-secondary 
+                              text-white font-semibold py-3 px-6 rounded-lg
+                              hover:shadow-lg hover:-translate-y-0.5
+                              transform transition-all duration-200
+                              focus:outline-none focus:ring-4 focus:ring-blue-300
+                            ">
+                              Click Me! ✨
+                            </button>
+                        </div>
+                        
+                        <!-- Response Section -->
+                        <div class="bg-gray-50 rounded-lg p-4 min-h-[60px] flex items-center justify-center">
+                            <div id="response" class="text-gray-700 text-center font-medium">
+                              Click the button to call the Rust backend! 🚀
+                            </div>
+                        </div>
+                        
+                        <!-- Stats Section -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                              <div class="text-2xl font-bold text-primary" id="click-count">0</div>
+                              <div class="text-sm text-gray-600">Button Clicks</div>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-4 text-center">
+                              <div class="text-2xl font-bold text-secondary" id="status">Ready</div>
+                              <div class="text-sm text-gray-600">Status</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backend Section -->
+            <div id="backend" class="content-section hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-900">🔧 Backend Testing</h2>
+                        <!-- Backend Status indicator -->
+                        <div class="flex items-center space-x-2">
+                            <div id="status-indicator" class="h-2 w-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span id="status-text" class="text-sm text-gray-600">Ready</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <!-- Interactive Features -->
+                        <div class="flex space-x-2">
+                            <input 
+                                id="message-input" 
+                                type="text" 
+                                placeholder="Send a message to Rust..."
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            />
+                            <button id="send-message" class="
+                                px-4 py-2 bg-green-500 text-white rounded-lg
+                                hover:bg-green-600 transition-colors duration-200
+                                focus:outline-none focus:ring-2 focus:ring-green-300
+                            ">
+                                Send
+                            </button>
+                        </div>
+                        
+                        <!-- Get Stats Button -->
+                        <button id="get-stats" class="
+                            w-full px-4 py-2 bg-indigo-500 text-white rounded-lg
+                            hover:bg-indigo-600 transition-colors duration-200
+                            focus:outline-none focus:ring-2 focus:ring-indigo-300
+                        ">
+                            📊 Get Backend Stats
+                        </button>
+                        
+                        <!-- Backend Status -->
+                        <div id="backend-status" class="bg-gray-50 rounded-lg p-4">
+                            <h3 class="font-medium text-gray-900 mb-2">Backend Status</h3>
+                            <div id="backend-response" class="text-sm text-gray-600">
+                                Click "Test Backend" to check connection...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div id="stats" class="content-section hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">📊 Application Stats</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="text-center p-6 bg-blue-50 rounded-lg">
+                            <div class="text-3xl font-bold text-blue-600" id="total-clicks">0</div>
+                            <div class="text-sm text-blue-800">Total Clicks</div>
+                        </div>
+                        <div class="text-center p-6 bg-purple-50 rounded-lg">
+                            <div class="text-3xl font-bold text-purple-600" id="total-messages">0</div>
+                            <div class="text-sm text-purple-800">Messages Sent</div>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <button id="refresh-stats" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+                            🔄 Refresh Stats
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Section -->
+            <div id="messages" class="content-section hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">💬 Message History</h2>
+                    
+                    <!-- Message History -->
+                    <div id="message-history" class="max-h-96 overflow-y-auto bg-gray-50 rounded-lg p-4 mb-4">
+                        <div class="text-gray-500 text-center">Message history will appear here...</div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <input 
+                            id="message-input-2" 
+                            type="text" 
+                            placeholder="Type a message..."
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                        />
+                        <button id="send-message-2" class="
+                            px-4 py-2 bg-green-500 text-white rounded-lg
+                            hover:bg-green-600 transition-colors duration-200
+                        ">
+                            Send
+                        </button>
+                    </div>
+                    
+                    <button id="clear-messages" class="w-full mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                        🗑️ Clear History
+                    </button>
+                </div>
+            </div>
+
+            <!-- Debug Log Section -->
+            <div id="debug" class="content-section hidden">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">🐛 Live Debug Log</h2>
+                    
+                    <!-- Debug Controls -->
+                    <div class="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2">
+                                <div id="debug-status" class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span id="debug-status-text" class="text-sm font-medium text-gray-700">Live</span>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                <span id="debug-log-count">0</span> entries
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="toggle-debug" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+                                Pause
+                            </button>
+                            <button id="clear-debug" class="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Debug Log Display -->
+                    <div id="debug-log" class="h-96 overflow-y-auto bg-black text-green-400 rounded-lg p-4 font-mono text-sm">
+                        <div class="text-gray-500">🚀 Debug log started - Backend output will appear here...</div>
+                    </div>
+                    
+                    <!-- Auto-scroll toggle -->
+                    <div class="flex items-center mt-4 p-3 bg-gray-50 rounded-lg">
+                        <input type="checkbox" id="auto-scroll" checked class="mr-2">
+                        <label for="auto-scroll" class="text-sm text-gray-700">Auto-scroll to bottom</label>
+                        <div class="ml-auto text-xs text-gray-500">
+                            Press Ctrl+C in terminal to see log entries
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+      // Global variables
+      let clickCount = 0;
+      let messageHistory = [];
+      let appStats = { clicks: 0, messages: 0 };
+      let invoke = null;
+      let loadedFiles = [];
+      let activeTabId = null;
+
+      // Debug log variables
+      let debugLog = [];
+      let debugEnabled = true;
+      let debugLogCount = 0;
+      let debugUpdateInterval = null;
+
+      // Safe debug logging function
+      function safeAddDebugEntry(message, level = 'info') {
+        try {
+          if (typeof addDebugEntry === 'function') {
+            addDebugEntry(message, level);
+          } else {
+            console.log(`[DEBUG ${level.toUpperCase()}]`, message);
+          }
+        } catch (error) {
+          console.log(`[DEBUG ${level.toUpperCase()}]`, message);
+        }
+      }
+
+      // File management functionality
+      function addFileTab(fileName, fileId) {
+        const secondaryNavLinks = document.getElementById('secondary-nav-links');
+        const secondaryNav = document.getElementById('secondary-nav');
+        
+        // Create new tab element
+        const tabElement = document.createElement('div');
+        tabElement.className = 'secondary-nav-tab inline-flex items-center px-3 py-2 text-sm font-medium mr-2 flex-shrink-0 border rounded-md cursor-pointer transition-colors';
+        tabElement.setAttribute('data-file-id', fileId);
+        
+        // Set active state for first tab or if no active tab
+        if (loadedFiles.length === 0 || !activeTabId) {
+          tabElement.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+          activeTabId = fileId;
+        } else {
+          tabElement.classList.add('bg-gray-600', 'text-gray-300', 'border-gray-600', 'hover:bg-gray-500', 'hover:text-white');
+        }
+        
+        tabElement.innerHTML = `
+          <span class="mr-2 whitespace-nowrap">${fileName}</span>
+          <button class="ml-1 hover:text-red-400 focus:outline-none" onclick="removeTab('${fileId}', event)">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        `;
+
+        // Add click handler to entire tab element
+        tabElement.addEventListener('click', (e) => {
+          // Don't trigger tab selection if clicking the remove button
+          if (e.target.closest('button')) return;
+          selectTab(fileId);
+        });
+        
+        secondaryNavLinks.appendChild(tabElement);
+        
+        // Show secondary navbar if it was hidden
+        secondaryNav.classList.remove('hidden');
+        
+        // Add file to loaded files array
+        loadedFiles.push({
+          id: fileId,
+          name: fileName,
+          element: tabElement
+        });
+        
+        console.log(`Added tab for file: ${fileName} (ID: ${fileId})`);
+      }
+
+      function removeTab(fileId, event) {
+        event.stopPropagation();
+        
+        const fileIndex = loadedFiles.findIndex(f => f.id === fileId);
+        if (fileIndex === -1) return;
+        
+        const file = loadedFiles[fileIndex];
+        
+        // Remove tab element
+        file.element.remove();
+        
+        // Remove from loaded files array
+        loadedFiles.splice(fileIndex, 1);
+        
+        // Handle active tab logic
+        if (activeTabId === fileId) {
+          if (loadedFiles.length > 0) {
+            // Set first remaining tab as active
+            selectTab(loadedFiles[0].id);
+          } else {
+            // No tabs left, hide secondary navbar
+            activeTabId = null;
+            document.getElementById('secondary-nav').classList.add('hidden');
+          }
+        }
+        
+        console.log(`Removed tab for file: ${file.name}`);
+      }
+
+      function selectTab(fileId) {
+        // Update active tab styling
+        loadedFiles.forEach(file => {
+          if (file.id === fileId) {
+            // Remove inactive styling
+            file.element.classList.remove('bg-gray-600', 'text-gray-300', 'border-gray-600', 'hover:bg-gray-500', 'hover:text-white');
+            // Add active styling
+            file.element.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+          } else {
+            // Remove active styling
+            file.element.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+            // Add inactive styling
+            file.element.classList.add('bg-gray-600', 'text-gray-300', 'border-gray-600', 'hover:bg-gray-500', 'hover:text-white');
+          }
+        });
+        
+        activeTabId = fileId;
+        const activeFile = loadedFiles.find(f => f.id === fileId);
+        console.log(`Selected tab: ${activeFile?.name}`);
+        
+        // Here you could load and display the file content
+        // For now, just update the response area
+        document.getElementById('response').innerHTML = `
+          <div class="text-blue-700 text-center font-medium">
+            📊 Viewing: ${activeFile?.name}<br>
+            <small>File content would be displayed here</small>
+          </div>
+        `;
+      }
+
+      // Drag scrolling functionality for secondary navbar
+      function initDragScrolling() {
+        const container = document.getElementById('secondary-nav-container');
+        const tabsContainer = document.getElementById('secondary-nav-links');
+        
+        let isDown = false;
+        let startX = 0;
+        let scrollLeft = 0;
+        let currentTranslateX = 0;
+
+        container.addEventListener('mousedown', (e) => {
+          isDown = true;
+          startX = e.pageX - container.offsetLeft;
+          scrollLeft = currentTranslateX;
+          container.style.cursor = 'grabbing';
+          // Prevent text selection during drag
+          e.preventDefault();
+        });
+
+        container.addEventListener('mouseleave', () => {
+          isDown = false;
+          container.style.cursor = 'grab';
+        });
+
+        container.addEventListener('mouseup', () => {
+          isDown = false;
+          container.style.cursor = 'grab';
+        });
+
+        container.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          
+          const x = e.pageX - container.offsetLeft;
+          const walk = (x - startX) * 1; // Scroll speed multiplier
+          const newTranslateX = scrollLeft + walk;
+          
+          // Get bounds for scrolling limits
+          const containerWidth = container.offsetWidth;
+          const tabsWidth = tabsContainer.scrollWidth;
+          
+          // Calculate max scroll (prevent over-scrolling)
+          const maxScroll = Math.min(0, containerWidth - tabsWidth);
+          const minScroll = 0;
+          
+          // Constrain the scroll within bounds
+          currentTranslateX = Math.max(maxScroll, Math.min(minScroll, newTranslateX));
+          
+          // Apply the transform
+          tabsContainer.style.transform = `translateX(${currentTranslateX}px)`;
+        });
+
+        // Touch support for mobile
+        container.addEventListener('touchstart', (e) => {
+          isDown = true;
+          startX = e.touches[0].pageX - container.offsetLeft;
+          scrollLeft = currentTranslateX;
+        });
+
+        container.addEventListener('touchend', () => {
+          isDown = false;
+        });
+
+        container.addEventListener('touchmove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          
+          const x = e.touches[0].pageX - container.offsetLeft;
+          const walk = (x - startX) * 1;
+          const newTranslateX = scrollLeft + walk;
+          
+          const containerWidth = container.offsetWidth;
+          const tabsWidth = tabsContainer.scrollWidth;
+          const maxScroll = Math.min(0, containerWidth - tabsWidth);
+          const minScroll = 0;
+          
+          currentTranslateX = Math.max(maxScroll, Math.min(minScroll, newTranslateX));
+          tabsContainer.style.transform = `translateX(${currentTranslateX}px)`;
+        });
+
+        // Reset scroll position when tabs change
+        window.resetTabScroll = () => {
+          currentTranslateX = 0;
+          tabsContainer.style.transform = 'translateX(0px)';
+        };
+      }
+
+      // File picker functionality
+      async function openFilePicker() {
+        console.log('=== openFilePicker function called ===');
+        try {
+          console.log('Opening file picker...');
+          safeAddDebugEntry('📁 Opening file picker dialog', 'info');
+          
+          // Create file input element
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = '.xlsx,.xls';
+          input.style.display = 'none';
+          
+          // Handle file selection
+          input.onchange = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+              const fileId = Date.now().toString(); // Simple ID generation
+              const fileName = file.name;
+              
+              safeAddDebugEntry(`📄 File selected: ${fileName}`, 'success');
+              
+              // Add tab for the selected file
+              addFileTab(fileName, fileId);
+              
+              console.log(`File selected: ${fileName}`);
+              
+              // Here you would typically read and process the Excel file
+              // For now, just show a success message
+              document.getElementById('response').innerHTML = `
+                <div class="text-green-700 text-center font-medium">
+                  ✅ File loaded successfully!<br>
+                  <small>File: ${fileName}</small>
+                </div>
+              `;
+            }
+            
+            // Clean up
+            document.body.removeChild(input);
+          };
+          
+          // Trigger file picker
+          document.body.appendChild(input);
+          input.click();
+          
+        } catch (error) {
+          console.error('Error opening file picker:', error);
+          document.getElementById('response').innerHTML = `
+            <div class="text-red-700 text-center font-medium">
+              ❌ Error opening file picker<br>
+              <small>${error.message}</small>
+            </div>
+          `;
+        }
+      }
+
+      // Navigation functionality
+      function initNavigation() {
+        const navLinks = document.querySelectorAll('.nav-link');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+        const sections = document.querySelectorAll('.content-section');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        // Desktop navigation
+        navLinks.forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href').substring(1);
+            showSection(targetId);
+            updateActiveLink(link, navLinks);
+          });
+        });
+
+        // Mobile navigation
+        mobileNavLinks.forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href').substring(1);
+            showSection(targetId);
+            updateActiveMobileLink(link, mobileNavLinks);
+            toggleMobileMenu(); // Close mobile menu after selection
+          });
+        });
+
+        // Mobile menu toggle
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+
+        // Debug log functionality
+        function addDebugEntry(message, level = 'info') {
+          if (!debugEnabled) return;
+          
+          const timestamp = new Date().toLocaleTimeString();
+          const entry = {
+            timestamp,
+            message,
+            level,
+            id: Date.now() + Math.random()
+          };
+          
+          debugLog.push(entry);
+          debugLogCount++;
+          
+          // Keep only last 1000 entries to prevent memory issues
+          if (debugLog.length > 1000) {
+            debugLog = debugLog.slice(-1000);
+          }
+          
+          updateDebugDisplay();
+        }
+
+        function updateDebugDisplay() {
+          const logElement = document.getElementById('debug-log');
+          const countElement = document.getElementById('debug-log-count');
+          
+          if (!logElement || !countElement) return;
+          
+          countElement.textContent = debugLogCount;
+          
+          // Build HTML for recent entries (show last 50)
+          const recentEntries = debugLog.slice(-50);
+          const html = recentEntries.map(entry => {
+            const levelColors = {
+              info: 'text-green-400',
+              warn: 'text-yellow-400',
+              error: 'text-red-400',
+              success: 'text-blue-400'
+            };
+            
+            return `<div class="${levelColors[entry.level] || 'text-green-400'}">
+              <span class="text-gray-500">[${entry.timestamp}]</span> ${entry.message}
+            </div>`;
+          }).join('');
+          
+          if (html) {
+            logElement.innerHTML = html;
+          }
+          
+          // Auto-scroll to bottom if enabled
+          const autoScroll = document.getElementById('auto-scroll');
+          if (autoScroll && autoScroll.checked) {
+            logElement.scrollTop = logElement.scrollHeight;
+          }
+        }
+
+        function toggleDebugLog() {
+          debugEnabled = !debugEnabled;
+          const button = document.getElementById('toggle-debug');
+          const status = document.getElementById('debug-status');
+          const statusText = document.getElementById('debug-status-text');
+          
+          if (debugEnabled) {
+            button.textContent = 'Pause';
+            status.className = 'w-3 h-3 bg-green-500 rounded-full';
+            statusText.textContent = 'Live';
+            safeAddDebugEntry('🟢 Debug logging resumed', 'success');
+          } else {
+            button.textContent = 'Resume';
+            status.className = 'w-3 h-3 bg-red-500 rounded-full';
+            statusText.textContent = 'Paused';
+          }
+        }
+
+        function clearDebugLog() {
+          debugLog = [];
+          debugLogCount = 0;
+          document.getElementById('debug-log').innerHTML = '<div class="text-gray-500">🚀 Debug log cleared - Backend output will appear here...</div>';
+          document.getElementById('debug-log-count').textContent = '0';
+        }
+
+        // Simulate backend debug messages (since we can't actually capture stderr in browser)
+        function startDebugSimulation() {
+          if (debugUpdateInterval) return;
+          
+          debugUpdateInterval = setInterval(() => {
+            if (!debugEnabled) return;
+            
+            // Add some sample debug messages
+            const messages = [
+              '📡 Backend heartbeat check',
+              '🔄 Processing user request',
+              '📊 Stats updated successfully',
+              '💾 File operation completed',
+              '🔐 Security check passed',
+              '⚡ Performance metrics logged',
+              '🌐 Network connection stable',
+              '🎯 Task queue processed'
+            ];
+            
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            safeAddDebugEntry(randomMessage, 'info');
+          }, 3000 + Math.random() * 2000); // Every 3-5 seconds
+        }
+
+        function showSection(sectionId) {
+          sections.forEach(section => {
+            section.classList.add('hidden');
+          });
+          document.getElementById(sectionId).classList.remove('hidden');
+          
+          // Show/hide secondary navbar based on section
+          const secondaryNav = document.getElementById('secondary-nav');
+          if (sectionId === 'home' && loadedFiles.length > 0) {
+            secondaryNav.classList.remove('hidden');
+          } else {
+            secondaryNav.classList.add('hidden');
+          }
+        }
+
+        function updateActiveLink(activeLink, allLinks) {
+          allLinks.forEach(link => {
+            link.classList.remove('border-primary', 'text-gray-900');
+            link.classList.add('border-transparent', 'text-gray-500');
+          });
+          activeLink.classList.remove('border-transparent', 'text-gray-500');
+          activeLink.classList.add('border-primary', 'text-gray-900');
+        }
+
+        function updateActiveMobileLink(activeLink, allLinks) {
+          allLinks.forEach(link => {
+            link.classList.remove('bg-primary', 'text-white');
+            link.classList.add('text-gray-700', 'hover:bg-gray-200');
+          });
+          activeLink.classList.remove('text-gray-700', 'hover:bg-gray-200');
+          activeLink.classList.add('bg-primary', 'text-white');
+        }
+
+        function toggleMobileMenu() {
+          mobileMenu.classList.toggle('hidden');
+          const icon = mobileMenuBtn.querySelector('svg');
+          const bars = icon.querySelector('.block');
+          const x = icon.querySelector('.hidden');
+          
+          bars.classList.toggle('hidden');
+          x.classList.toggle('hidden');
+          bars.classList.toggle('block');
+          x.classList.toggle('block');
+        }
+      }
+
+      // Status indicator functionality
+      function updateStatus(message, isError = false) {
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        
+        if (statusText) {
+          statusText.textContent = message;
+        }
+        
+        if (statusIndicator) {
+          if (isError) {
+            statusIndicator.className = 'h-2 w-2 bg-red-400 rounded-full animate-pulse';
+          } else {
+            statusIndicator.className = 'h-2 w-2 bg-green-400 rounded-full animate-pulse';
+          }
+        }
+      }
+
+      // Tauri API initialization
+      async function initializeTauri() {
+        console.log('Initializing Tauri API...');
+        
+        if (window.__TAURI__ && window.__TAURI__.core) {
+          invoke = window.__TAURI__.core.invoke;
+          console.log('Using window.__TAURI__.core.invoke');
+        } else if (window.__TAURI__ && window.__TAURI__.invoke) {
+          invoke = window.__TAURI__.invoke;
+          console.log('Using window.__TAURI__.invoke');
+        } else if (window.invoke) {
+          invoke = window.invoke;
+          console.log('Using window.invoke');
+        } else {
+          console.log('Waiting for Tauri API...');
+          // Wait a bit more for Tauri to initialize
+          await new Promise(resolve => setTimeout(resolve, 100));
+          if (window.__TAURI__) {
+            invoke = window.__TAURI__.core?.invoke || window.__TAURI__.invoke;
+            console.log('Tauri API found after delay');
+          }
+        }
+        
+        if (!invoke) {
+          console.error('Tauri invoke function not found');
+          updateStatus('Tauri API not available', true);
+          return false;
+        }
+        
+        console.log('Tauri initialized successfully');
+        updateStatus('Ready', false);
+        return true;
+      }
+
+      // Backend test function
+      async function testBackend() {
+        try {
+          updateStatus('Testing...', false);
+          if (!invoke) {
+            await initializeTauri();
+          }
+          
+          const result = await invoke('button_clicked');
+          console.log('Backend test result:', result);
+          document.getElementById('backend-response').textContent = `✅ Backend connected! Response: ${result.message}`;
+          updateStatus('Connected', false);
+          return result;
+        } catch (error) {
+          console.error('Backend test failed:', error);
+          document.getElementById('backend-response').textContent = `❌ Backend connection failed: ${error.message}`;
+          updateStatus('Error', true);
+          throw error;
+        }
+      }
+
+      // Message history management
+      function addToMessageHistory(message, response) {
+        messageHistory.push({ message, response, timestamp: new Date() });
+        updateMessageHistoryDisplay();
+      }
+
+      function updateMessageHistoryDisplay() {
+        const historyEl = document.getElementById('message-history');
+        if (messageHistory.length === 0) {
+          historyEl.innerHTML = '<div class="text-gray-500 text-center">Message history will appear here...</div>';
+          return;
+        }
+
+        historyEl.innerHTML = messageHistory.map(item => `
+          <div class="mb-2 p-2 bg-white rounded border-l-4 border-blue-500">
+            <div class="font-medium text-sm">You: ${item.message}</div>
+            <div class="text-gray-600 text-sm">Rust: ${item.response}</div>
+            <div class="text-xs text-gray-400">${item.timestamp.toLocaleTimeString()}</div>
+          </div>
+        `).join('');
+      }
+
+      // Stats management
+      function updateStatsDisplay() {
+        document.getElementById('click-count').textContent = appStats.clicks;
+        document.getElementById('total-clicks').textContent = appStats.clicks;
+        document.getElementById('total-messages').textContent = appStats.messages;
+      }
+
+      // Main button click handler
+      async function handleButtonClick() {
+        console.log('Button clicked, invoke available:', !!invoke);
+        safeAddDebugEntry('🔘 Frontend button clicked', 'info');
+        
+        if (!invoke) {
+          safeAddDebugEntry('⚠️ Tauri invoke not available, attempting to initialize...', 'warn');
+          await initializeTauri();
+        }
+
+        if (!invoke) {
+          safeAddDebugEntry('❌ Failed to initialize Tauri invoke', 'error');
+          document.getElementById('response').innerHTML = `
+            <div class="text-red-600 font-semibold">❌ Tauri invoke not available</div>
+          `;
+          return;
+        }
+
+        try {
+          document.getElementById('status').textContent = 'Loading...';
+          document.getElementById('response').textContent = 'Calling Rust backend... 🔄';
+          safeAddDebugEntry('📡 Calling Rust backend function: button_clicked', 'info');
+          
+          const result = await invoke('button_clicked');
+          console.log('Received from Rust:', result);
+          safeAddDebugEntry(`✅ Backend response received: ${result.message}`, 'success');
+          
+          clickCount++;
+          appStats.clicks++;
+          updateStatsDisplay();
+          
+          document.getElementById('response').innerHTML = `
+            <div class="text-green-700">
+              <span class="font-semibold">✅ Success!</span><br>
+              ${result.message}
+            </div>
+          `;
+          document.getElementById('status').textContent = 'Connected';
+          
+        } catch (error) {
+          console.error('Button click error:', error);
+          safeAddDebugEntry(`❌ Backend call failed: ${error.message}`, 'error');
+          document.getElementById('response').innerHTML = `
+            <div class="text-red-700">
+              <span class="font-semibold">❌ Error:</span><br>
+              ${error.message || error}
+            </div>
+          `;
+          document.getElementById('status').textContent = 'Error';
+        }
+      }
+
+      // Message sending functionality
+      async function sendMessage(inputId, isSecondInput = false) {
+        const input = document.getElementById(inputId);
+        const message = input.value.trim();
+        
+        if (!message) return;
+        
+        safeAddDebugEntry(`💬 Preparing to send message: "${message}"`, 'info');
+        
+        if (!invoke) {
+          safeAddDebugEntry('⚠️ Tauri invoke not available for message, attempting to initialize...', 'warn');
+          await initializeTauri();
+        }
+
+        if (!invoke) {
+          safeAddDebugEntry('❌ Failed to initialize Tauri for message sending', 'error');
+          if (!isSecondInput) {
+            document.getElementById('response').innerHTML = `
+              <div class="text-red-600 font-semibold">❌ Tauri API not available</div>
+            `;
+          }
+          return;
+        }
+
+        try {
+          console.log('Sending message:', message);
+          safeAddDebugEntry('📡 Calling Rust backend function: send_message', 'info');
+          const result = await invoke('send_message', { message });
+          console.log('Message response:', result);
+          safeAddDebugEntry(`✅ Message response received: "${result.response}"`, 'success');
+          
+          appStats.messages++;
+          updateStatsDisplay();
+          
+          addToMessageHistory(message, result.response);
+          input.value = '';
+          
+          if (!isSecondInput) {
+            document.getElementById('response').innerHTML = `
+              <div class="text-blue-700">
+                <span class="font-semibold">💬 Message sent!</span><br>
+                Response: ${result.response}
+              </div>
+            `;
+          }
+          
+        } catch (error) {
+          console.error('Send message error:', error);
+          if (!isSecondInput) {
+            document.getElementById('response').innerHTML = `
+              <div class="text-red-700">
+                <span class="font-semibold">❌ Message Error:</span><br>
+                ${error.message || error}
+              </div>
+            `;
+          }
+        }
+      }
+
+      // Get stats functionality
+      async function getStats() {
+        if (!invoke) {
+          await initializeTauri();
+        }
+
+        if (!invoke) {
+          document.getElementById('response').innerHTML = `
+            <div class="text-red-600 font-semibold">❌ Tauri API not available</div>
+          `;
+          return;
+        }
+
+        try {
+          console.log('Getting stats from backend...');
+          const result = await invoke('get_stats');
+          console.log('Stats received:', result);
+          
+          document.getElementById('response').innerHTML = `
+            <div class="text-indigo-700">
+              <span class="font-semibold">📊 Stats Retrieved!</span><br>
+              <small>${JSON.stringify(result, null, 2)}</small>
+            </div>
+          `;
+          
+        } catch (error) {
+          console.error('Get stats error:', error);
+          document.getElementById('response').innerHTML = `
+            <div class="text-red-700">
+              <span class="font-semibold">❌ Stats Error:</span><br>
+              ${error.message || error}
+            </div>
+          `;
+        }
+      }
+
+      // Setup app
+      async function setupApp() {
+        console.log('Setting up app...');
+        
+        // Initialize navigation
+        initNavigation();
+        
+        // Initialize Tauri
+        await initializeTauri();
+        
+        // Main click button
+        document.getElementById('click-btn').addEventListener('click', handleButtonClick);
+
+        // Message input handlers
+        document.getElementById('send-message').addEventListener('click', () => {
+          sendMessage('message-input');
+        });
+        
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            sendMessage('message-input');
+          }
+        });
+
+        // Messages section handlers
+        document.getElementById('send-message-2').addEventListener('click', () => {
+          sendMessage('message-input-2', true);
+        });
+        
+        document.getElementById('message-input-2').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            sendMessage('message-input-2', true);
+          }
+        });
+
+        document.getElementById('clear-messages').addEventListener('click', () => {
+          messageHistory = [];
+          updateMessageHistoryDisplay();
+        });
+
+        // Debug log event listeners
+        document.getElementById('toggle-debug').addEventListener('click', toggleDebugLog);
+        document.getElementById('clear-debug').addEventListener('click', clearDebugLog);
+
+        // Get stats buttons
+        document.getElementById('get-stats').addEventListener('click', getStats);
+        document.getElementById('refresh-stats').addEventListener('click', getStats);
+
+        // Navbar Add File buttons (changed from test backend)
+        const navbarBtn = document.getElementById('navbar-test-backend');
+        const mobileBtn = document.getElementById('mobile-test-backend');
+        
+        console.log('Navbar button found:', !!navbarBtn);
+        console.log('Mobile button found:', !!mobileBtn);
+        
+        if (navbarBtn) {
+          navbarBtn.addEventListener('click', openFilePicker);
+          console.log('Event listener added to navbar button');
+        }
+        if (mobileBtn) {
+          mobileBtn.addEventListener('click', openFilePicker);
+          console.log('Event listener added to mobile button');
+        }
+
+        // Initialize displays
+        updateStatsDisplay();
+        updateMessageHistoryDisplay();
+
+        // Initialize drag scrolling and show home section
+        initDragScrolling();
+        showSection('home');
+        
+        // Initialize debug log with a small delay to ensure everything is loaded
+        setTimeout(() => {
+          safeAddDebugEntry('🚀 Tauri + Tailwind App initialized', 'success');
+          safeAddDebugEntry('🔧 Debug logging system started', 'info');
+          startDebugSimulation();
+        }, 100);
+
+        console.log('App setup complete!');
+      }
+      
+      // Initialize when DOM is loaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupApp);
+      } else {
+        setupApp();
+      }
+
+      // Debug function
+      window.debugTauri = () => {
+        console.log('=== Tauri Debug Info ===');
+        console.log('window.__TAURI__:', window.__TAURI__);
+        console.log('Available commands:', window.__TAURI__?.core);
+        console.log('Click count:', clickCount);
+        console.log('Message history:', messageHistory);
+        console.log('App stats:', appStats);
+      };
+    </script>
+  </body>
+</html>
